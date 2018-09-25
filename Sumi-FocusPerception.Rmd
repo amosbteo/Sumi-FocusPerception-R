@@ -1,0 +1,67 @@
+---
+title: "Sumi focus perception results (5 subjects)"
+output: html_document
+---
+
+## 1. Load Data
+```{r}
+#rm(list=ls())
+SumiFoc.df <- read.csv("data/pilot_results.csv", header = TRUE, sep = ",")
+
+# Convert from wide to long format
+#library(tidyr)
+#SumiFoc.long <- gather(SumiFoc.df, key = "Listener", value = "Score", L01:L12)
+#View(SumiFoc.wide)
+#SumiFoc.long$Listener <- as.factor(SumiFoc.long$Listener)
+#str(SumiFoc.long)
+
+SumiFoc.df$factor <- paste(SumiFoc.df$predicate_gloss, SumiFoc.df$condition, sep = "_")
+SumiFoc.df$factor <- factor(SumiFoc.df$factor, levels = c("chasing_broad","chasing_narrow","sleeping_broad","sleeping_narrow","bigger_narrow"))
+SumiFoc.df$score <- SumiFoc.df$key_resp_5.keys
+SumiFoc.df$score <- gsub("w", 1, SumiFoc.df$score)
+SumiFoc.df$score <- gsub("f", 2, SumiFoc.df$score)
+SumiFoc.df$score <- gsub("j", 3, SumiFoc.df$score)
+SumiFoc.df$score <- gsub("p", 4, SumiFoc.df$score)
+SumiFoc.df$score <- as.integer(SumiFoc.df$score)
+
+# Group all tone tokens into tone types
+SumiFoc.df$AS_tone <- gsub(".{1}$", "", SumiFoc.df$AS_tone)
+
+# Omit participant 5
+SumiFoc.df <- subset(SumiFoc.df, participant != "5")
+```
+
+
+## 2. Look at effect of Condition (Carrier1 vs. Isol1 vs. Isol3) on Score
+```{r}
+library(Rmisc)
+#library(multcomp)
+library(ggplot2)
+
+# Summarize by and Condition & Listener
+SumiFoc.summ <- summarySE(SumiFoc.df, "score", groupvars = c("predicate_gloss", "condition"), na.rm = TRUE)
+SumiFoc.summ
+SumiFoc.summ$factor <- paste(SumiFoc.summ$predicate_gloss, SumiFoc.summ$condition, sep = "_")
+SumiFoc.summ$factor <- factor(SumiFoc.summ$factor, levels = c("chasing_broad","chasing_narrow","sleeping_broad","sleeping_narrow","bigger_narrow"))
+#SumiFoc.summ$factor <- interaction(SumiFoc.summ$predicate_gloss, SumiFoc.summ$condition)
+
+# Boxplot
+boxplot(score ~ factor, data = SumiFoc.df, main = "Score by Condition", names=c("chase\nbroad","chase\nnarrow", "sleep\nbroad", "sleep\nnarrow", "big\nnarrow"), ylab = "Condition", xlab = "1 = Narrow Focus, 4 = Broad Focus", ylim=c(0,5), horizontal = T)
+dev.copy(png, "figures/SumiFoc-perception_score-4subjects.png")
+dev.off()
+
+#SumiFoc.subset <- subset(SumiFoc.df, predicate_gloss != "bigger")
+#boxplot(score ~ AS_tone, data = SumiFoc.subset, main = "Score by Tone", ylab = "Tone", xlab = "1 = Narrow Focus, 4 = Broad Focus", ylim=c(0,5), horizontal = T)
+
+#library(ggplot2)
+#pd <- position_dodge(.05)
+#ggplot(SumiFoc.df, aes(x = condition, y = score, group = participant)) +
+#  geom_point(aes(Color = participant), position = pd) +
+#  facet_grid(~predicate_gloss) +
+#  theme_bw()
+```
+
+## Save RData
+```{r}
+save.image(file="output/SumiFoc-perception.RData")
+```
