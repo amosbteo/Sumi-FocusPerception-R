@@ -19,8 +19,9 @@ SumiFoc.df <- read.csv("data/results.csv", header = TRUE, sep = ",")
 #SumiFoc.long$Listener <- as.factor(SumiFoc.long$Listener)
 #str(SumiFoc.long)
 
+SumiFoc.df$predicate_gloss <- factor(SumiFoc.df$predicate_gloss, levels = c("chasing", "sleeping", "bigger"))
 SumiFoc.df$factor <- paste(SumiFoc.df$predicate_gloss, SumiFoc.df$condition, sep = "_")
-SumiFoc.df$factor <- factor(SumiFoc.df$factor, levels = c("chasing_broad","chasing_narrow","sleeping_broad","sleeping_narrow","bigger_narrow"))
+SumiFoc.df$factor <- factor(SumiFoc.df$factor, levels = c("chasing_broad","sleeping_broad","chasing_narrow","sleeping_narrow","bigger_narrow"))
 SumiFoc.df$score <- SumiFoc.df$key_resp_5.keys
 SumiFoc.df$score <- gsub("w", 1, SumiFoc.df$score)
 SumiFoc.df$score <- gsub("f", 2, SumiFoc.df$score)
@@ -31,9 +32,13 @@ SumiFoc.df$score <- as.integer(SumiFoc.df$score)
 # Group all tone tokens into tone types
 SumiFoc.df$AS_tone <- gsub(".{1}$", "", SumiFoc.df$AS_tone)
 
-# Omit participants 5 & 8
+# Omit participant 0
+SumiFoc.df <- subset(SumiFoc.df, participant != "0")
+#SumiFoc.df <- subset(SumiFoc.df, participant == "0")
+
+# Omit participant 9
 #SumiFoc.df <- subset(SumiFoc.df, participant != "5")
-#SumiFoc.df <- subset(SumiFoc.df, participant != "8")
+SumiFoc.df <- subset(SumiFoc.df, participant != "9")
 ```
 
 
@@ -46,21 +51,43 @@ count(SumiFoc.df, factor, score)
 SumiFoc.summ <- summarySE(SumiFoc.df, "score", groupvars = c("predicate_gloss", "condition"), na.rm = TRUE)
 SumiFoc.summ
 SumiFoc.summ$factor <- paste(SumiFoc.summ$predicate_gloss, SumiFoc.summ$condition, sep = "_")
-SumiFoc.summ$factor <- factor(SumiFoc.summ$factor, levels = c("chasing_broad","chasing_narrow","sleeping_broad","sleeping_narrow","bigger_narrow"))
+SumiFoc.summ$factor <- factor(SumiFoc.summ$factor, levels = c("chasing_broad","sleeping_broad","chasing_narrow","sleeping_narrow","bigger_narrow"))
 #SumiFoc.summ$factor <- interaction(SumiFoc.summ$predicate_gloss, SumiFoc.summ$condition)
 
 # Boxplot
-SumiFoc.plot <- ggplot(SumiFoc.df, aes(x=factor, y=score)) + 
-  geom_boxplot() +
+SumiFoc.boxplot <- ggplot(SumiFoc.df, aes(x=factor, y=score)) + 
+  geom_boxplot(aes(fill = predicate_gloss)) +
+  scale_fill_brewer(palette = "YlGnBu") +
   theme_bw() +
-  labs(x = "Clause type & Focus condition", y = "Interpretation\n1 = Narrow Focus, 4 = Broad Focus") +
-  scale_x_discrete(labels = c("transitive\n(broad)","transitive\n(narrow)", "intransitive\n(broad)", "intransitive\n(narrow)", "verbless\n(narrow)")) +
-  theme(axis.title = element_text(size=20),
-           axis.text  = element_text(size=16)) +
+  labs(x = "Sentence type & Focus condition", y = "Rating\n1 = Narrow Focus, 4 = Broad Focus") +
+  scale_x_discrete(limits = rev(levels(SumiFoc.df$factor)), labels = c("verbless\nnarrow","intransitive\nnarrow","transitive\nnarrow","intransitive\nbroad","transitive\nbroad")) +
+  theme(axis.title = element_text(size = 17.5),
+        axis.text = element_text(size = 16)) + #Adjust font size of axes
+  theme(legend.position="none") +
   coord_flip()
-SumiFoc.plot
+SumiFoc.boxplot
 
-dev.copy(png, "figures/SumiFoc-perception_score-8subjects.png")
+#Save as PNG file
+png(file = "figures/SumiFoc-perception_score-8subjects-box.png", width = 500, height = 450, res = 72)
+SumiFoc.boxplot
+dev.off()
+
+SumiFoc.violinplot <- ggplot(SumiFoc.df, aes(x=factor, y=score)) + 
+  geom_violin(aes(fill = predicate_gloss)) +
+  stat_summary(fun.y = median, geom = "point", size = 2, color = "black") +
+  scale_fill_brewer(palette = "YlGnBu") +
+  theme_bw() +
+  labs(x = "Sentence type & Focus condition", y = "Rating\n1 = Narrow Focus, 4 = Broad Focus") +
+  scale_x_discrete(limits = rev(levels(SumiFoc.df$factor)), labels = c("verbless\nnarrow","intransitive\nnarrow","transitive\nnarrow","intransitive\nbroad","transitive\nbroad")) +
+  theme(axis.title = element_text(size = 17.5),
+        axis.text = element_text(size = 16)) + #Adjust font size of axes
+  theme(legend.position="none") +
+  coord_flip()
+SumiFoc.violinplot
+
+#Save as PNG file
+png(file = "figures/SumiFoc-perception_score-8subjects-violin.png", width = 715, height = 645, res = 72)
+SumiFoc.violinplot
 dev.off()
 
 #SumiFoc.subset <- subset(SumiFoc.df, predicate_gloss != "bigger")
