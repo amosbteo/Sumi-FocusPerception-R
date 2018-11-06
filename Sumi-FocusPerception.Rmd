@@ -32,13 +32,8 @@ SumiFoc.df$score <- as.integer(SumiFoc.df$score)
 # Group all tone tokens into tone types
 SumiFoc.df$AS_tone <- gsub(".{1}$", "", SumiFoc.df$AS_tone)
 
-# Omit participant 0
-SumiFoc.df <- subset(SumiFoc.df, participant != "0")
-#SumiFoc.df <- subset(SumiFoc.df, participant == "0")
-
-# Omit participant 9
-#SumiFoc.df <- subset(SumiFoc.df, participant != "5")
-SumiFoc.df <- subset(SumiFoc.df, participant != "9")
+# Omit participant 6 (SPeaker)
+SumiFoc.df <- subset(SumiFoc.df, participant != "6")
 ```
 
 
@@ -68,7 +63,7 @@ SumiFoc.boxplot <- ggplot(SumiFoc.df, aes(x=factor, y=score)) +
 SumiFoc.boxplot
 
 #Save as PNG file
-png(file = "figures/SumiFoc-perception_score-8subjects-box.png", width = 500, height = 450, res = 72)
+png(file = "figures/SumiFoc-perception_score-10subjects-box.png", width = 500, height = 450, res = 72)
 SumiFoc.boxplot
 dev.off()
 
@@ -86,7 +81,7 @@ SumiFoc.violinplot <- ggplot(SumiFoc.df, aes(x=factor, y=score)) +
 SumiFoc.violinplot
 
 #Save as PNG file
-png(file = "figures/SumiFoc-perception_score-8subjects-violin.png", width = 715, height = 645, res = 72)
+png(file = "figures/SumiFoc-perception_score-10subjects-violin.png", width = 715, height = 645, res = 72)
 SumiFoc.violinplot
 dev.off()
 
