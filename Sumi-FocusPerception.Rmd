@@ -32,7 +32,7 @@ SumiFoc.df$score <- as.integer(SumiFoc.df$score)
 # Group all tone tokens into tone types
 SumiFoc.df$AS_tone <- gsub(".{1}$", "", SumiFoc.df$AS_tone)
 
-# Omit participant 6 (SPeaker)
+# Omit participant 6 (Speaker)
 SumiFoc.df <- subset(SumiFoc.df, participant != "6")
 ```
 
@@ -69,13 +69,14 @@ dev.off()
 
 SumiFoc.violinplot <- ggplot(SumiFoc.df, aes(x=factor, y=score)) + 
   geom_violin(aes(fill = predicate_gloss)) +
-  stat_summary(fun.y = median, geom = "point", size = 2, color = "black") +
+  #geom_violin() +
+  stat_summary(fun.y = median, fun.ymin = median, fun.ymax = median, geom = "crossbar", width =  0.5) +
   scale_fill_brewer(palette = "YlGnBu") +
   theme_bw() +
-  labs(x = "Sentence type & Focus condition", y = "Rating\n1 = Narrow Focus, 4 = Broad Focus") +
+  labs(x = "Sentence type & Focus condition\n", y = "Rating\n1 = Narrow Focus, 4 = Broad Focus") +
   scale_x_discrete(limits = rev(levels(SumiFoc.df$factor)), labels = c("verbless\nnarrow","intransitive\nnarrow","transitive\nnarrow","intransitive\nbroad","transitive\nbroad")) +
-  theme(axis.title = element_text(size = 17.5),
-        axis.text = element_text(size = 16)) + #Adjust font size of axes
+  theme(axis.title = element_text(size = 19),
+        axis.text = element_text(size = 17.5)) + #Adjust font size of axes
   theme(legend.position="none") +
   coord_flip()
 SumiFoc.violinplot
@@ -84,9 +85,6 @@ SumiFoc.violinplot
 png(file = "figures/SumiFoc-perception_score-10subjects-violin.png", width = 715, height = 645, res = 72)
 SumiFoc.violinplot
 dev.off()
-
-#SumiFoc.subset <- subset(SumiFoc.df, predicate_gloss != "bigger")
-#boxplot(score ~ AS_tone, data = SumiFoc.subset, main = "Score by Tone", ylab = "Tone", xlab = "1 = Narrow Focus, 4 = Broad Focus", ylim=c(0,5), horizontal = T)
 ```
 
 ## Save RData
